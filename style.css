@@ -1,0 +1,3173 @@
+/**
+ * 全站样式表
+ * 3 磅(4px)黑色全页边框 + 白黄(#fffbe6)背景 + 左上角中英姓名标识
+ * 顶部导航：磨砂玻璃(Glassmorphism) / 圆角 / 内外发光 / 固定置顶 / 响应式
+ */
+
+:root {
+    /* 字体栈统一信源，回退顺序：WebFont → 系统书法/楷体 → 通用草书 */
+    --font-en-script: "Great Vibes", "Brush Script MT", "Segoe Script", cursive;
+    --font-zh-brush: "Ma Shan Zheng", "STKaiti", "KaiTi", "FangSong", cursive;
+    --font-sans: -apple-system, "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+
+    --ink: #1a1a1a;
+    --line: rgba(0, 0, 0, 0.35);
+
+    /* 导航玻璃质感参数（集中管理，便于统一调整） */
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-bg-fallback: rgba(255, 255, 255, 0.94); /* 不支持 backdrop-filter 时的回退色 */
+    --glass-border: #b8903f;                        /* 褐黄色（赭黄）边框，胶囊与下拉共用 */
+    --glass-blur: 12px;
+    --nav-radius: 999px;                            /* 胶囊式全圆角 */
+    --nav-z: 1000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+html {
+    scroll-behavior: smooth;   /* 导航锚点平滑滚动到对应屏 */
+}
+
+body {
+    /* 全页边框由各屏容器分别绘制：hero 画 上/左/右，about 画 下/左/右，
+       两屏交界处（hero 底边 & about 顶边）都不画，形成连续单框 */
+    background-color: #fffbe6;
+    min-height: 100vh;
+    position: relative;
+    font-family: var(--font-sans);
+}
+
+/* ============================================================
+   浮动粒子背景层
+   ============================================================ */
+.particle-bg {
+    position: fixed;
+    inset: 0;                  /* 铺满整个视口 */
+    width: 100%;
+    height: 100%;
+    z-index: 0;                /* 最底层 */
+    pointer-events: none;      /* 零交互，不挡任何元素 */
+    opacity: 0.85;             /* 整体透明度，确保不影响可读性 */
+}
+
+/* 让所有页面内容层级高于粒子背景 */
+/* 注意：不要用全局 body>* 规则改 position，会覆盖 .topbar/.ip-stage 的 fixed 定位；
+   各内容模块（.topbar z:1000 / .ip-stage z:10 / .creed-panel z:5）已自带更高 z-index */
+
+/* ============================================================
+   顶部导航栏
+   ============================================================ */
+
+/* 固定悬浮层：上下内边距由 padding 控制，左右保留 20~30px 外边距 */
+.topbar {
+    position: fixed;
+    top: 16px;
+    left: 24px;
+    right: 24px;
+    z-index: var(--nav-z);
+}
+
+/* 磨砂玻璃胶囊容器：全圆角 + 模糊 + 饱和提升 + 内外发光 + 褐黄描边 */
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 22px;
+    background-color: var(--glass-bg-fallback); /* 先给高不透明兜底 */
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--nav-radius);
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.5),   /* 内发光：玻璃高光 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),    /* 顶部受光边 */
+        0 8px 24px rgba(120, 90, 30, 0.14),        /* 外投影：暖褐调，与描边呼应 */
+        0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* 支持磨砂模糊的浏览器：启用真正的毛玻璃并降低底色不透明度 */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .navbar {
+        background-color: var(--glass-bg);
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+        backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    }
+}
+
+/* ---------- 左侧主导航链接 ---------- */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+}
+
+.nav-links a {
+    position: relative;
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* 悬停下划线：从中间向两端从容展开 */
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 3px;
+    height: 1.5px;
+    background-color: var(--ink);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.4s ease;
+}
+
+.nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.nav-links a:hover::after {
+    transform: scaleX(1);
+}
+
+/* ---------- 右侧功能区（margin-left:auto 将功能区推至导航最右端） ---------- */
+.nav-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* 所有功能按钮/图标的统一基座 */
+.tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0 10px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 0.35s ease, background-color 0.35s ease,
+                box-shadow 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+.tool-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Github / 百度 图标为实心字形 */
+.icon-github {
+    fill: currentColor !important;
+    stroke: none !important;
+}
+
+.icon-baidu {
+    width: 20px;
+    height: 20px;
+}
+
+.tool-btn:hover,
+.tool-btn:focus-visible {
+    background-color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    outline: none;
+}
+
+.tool-btn:active {
+    transform: translateY(0);
+}
+
+/* ---------- 背景音乐开关：开/关两态 ---------- */
+.music-toggle .music-wave {
+    display: none;          /* 关闭态隐藏律动条 */
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+}
+
+.music-wave i {
+    width: 2.5px;
+    height: 100%;
+    background-color: #fff;
+    border-radius: 2px;
+    transform-origin: bottom;
+}
+
+/* 开启态：深色底 + 白色音符 + 律动条动画，与关闭态形成强对比 */
+.music-toggle.is-on {
+    background-color: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+}
+
+.music-toggle.is-on .icon-music {
+    display: none;          /* 开启后切换为律动指示 */
+}
+
+.music-toggle.is-on .music-wave {
+    display: inline-flex;
+}
+
+.music-toggle.is-on .music-wave i:nth-child(1) {
+    animation: musicBar 0.9s ease-in-out infinite;
+}
+.music-toggle.is-on .music-wave i:nth-child(2) {
+    animation: musicBar 0.9s ease-in-out 0.18s infinite;
+}
+.music-toggle.is-on .music-wave i:nth-child(3) {
+    animation: musicBar 0.9s ease-in-out 0.36s infinite;
+}
+
+@keyframes musicBar {
+    0%, 100% { transform: scaleY(0.35); }
+    50%      { transform: scaleY(1); }
+}
+
+/* ---------- 语言切换下拉 ---------- */
+.lang-dropdown {
+    position: relative;
+}
+
+.lang-current {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.icon-caret {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.35s ease;
+}
+
+.lang-dropdown.is-open .icon-caret {
+    transform: rotate(180deg);
+}
+
+/* 下拉面板：与导航同款磨砂玻璃，右对齐避免溢出视口 */
+.lang-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 140px;
+    list-style: none;
+    padding: 6px;
+    background-color: var(--glass-bg-fallback);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow:
+        inset 0 0 10px rgba(255, 255, 255, 0.5),
+        0 10px 28px rgba(0, 0, 0, 0.14);
+    /* 展开/收起：透明 + 轻微下移的从容过渡 */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    z-index: calc(var(--nav-z) + 1);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .lang-menu {
+        background-color: var(--glass-bg);
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+        backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    }
+}
+
+.lang-dropdown.is-open .lang-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.lang-menu li {
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+}
+
+.lang-menu li:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* 当前选中语言：圆点 + 深色标记 */
+.lang-menu li[aria-selected="true"] {
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.lang-menu li[aria-selected="true"]::after {
+    content: "•";
+    float: right;
+    color: var(--ink);
+}
+
+/* ---------- 汉堡按钮（移动端显示） ---------- */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 38px;
+    height: 38px;
+    padding: 0 9px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.hamburger-line {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background-color: var(--ink);
+    border-radius: 2px;
+    transition: transform 0.35s ease, opacity 0.3s ease;
+}
+
+/* 汉堡→X 变形 */
+.hamburger.is-active .hamburger-line:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+.hamburger.is-active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+.hamburger.is-active .hamburger-line:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ============================================================
+   导航最左侧：中英姓名标识（英文花体 + 中文毛笔体，"双手写"）
+   ============================================================ */
+.brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    text-decoration: none;
+    /* 与主导航链接之间以发丝线分隔，保持玻璃栏内的呼吸感 */
+    padding-right: 18px;
+    border-right: 1px solid rgba(184, 144, 63, 0.45);
+    user-select: none;
+    cursor: default;
+    animation: brandFadeIn 1.6s ease both;
+}
+
+/* 英文名：连笔花体 */
+.brand-en {
+    font-family: var(--font-en-script);
+    font-size: 34px;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: transform 0.6s ease, color 0.6s ease;
+}
+
+/* 分隔线：高度与毛笔字字面取齐 */
+.brand-divider {
+    width: 1px;
+    height: 22px;
+    background-color: var(--line);
+}
+
+/* 中文名：马善政毛笔体，墨色略沉，字距收敛以保留书写气韵 */
+.brand-zh {
+    font-family: var(--font-zh-brush);
+    font-size: 22px;
+    line-height: 1;
+    color: #262626;
+    letter-spacing: 3px;
+    padding-top: 2px;          /* 毛笔体基线光学补偿，与花体中线对齐 */
+    white-space: nowrap;
+    transition: color 0.6s ease;
+}
+
+/* 悬停：英文名微上浮，毛笔字墨色加深，分隔线加重——整体联动 */
+.brand-lockup:hover .brand-en {
+    transform: translateY(-1px);
+    color: #000;
+}
+.brand-lockup:hover .brand-zh { color: #000; }
+.brand-lockup:hover .brand-divider { background-color: rgba(0, 0, 0, 0.6); }
+
+@keyframes brandFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   响应式：<768px 链接折叠为汉堡菜单
+   ============================================================ */
+@media (max-width: 767px) {
+
+    .topbar {
+        top: 12px;
+        left: 14px;
+        right: 14px;
+    }
+
+    .navbar {
+        padding: 10px 14px;
+        flex-wrap: wrap;      /* 允许移动菜单换行落到第二行 */
+    }
+
+    /* 第一行：汉堡居左、功能区居右 */
+    .hamburger {
+        display: inline-flex;
+        order: 1;
+    }
+
+    .nav-tools {
+        order: 2;
+        margin-left: auto;    /* 功能区始终贴右 */
+        gap: 6px;
+    }
+
+    /* 语言按钮在窄屏只保留地球图标，避免拥挤溢出 */
+    .lang-current,
+    .icon-caret {
+        display: none;
+    }
+
+    .lang-trigger {
+        padding: 0;
+    }
+
+    /* 第二行：姓名标识独占一行，去除与链接之间的竖向发丝线 */
+    .brand-lockup {
+        order: 3;
+        flex-basis: 100%;
+        gap: 10px;
+        padding: 10px 2px 0;
+        border-right: none;
+        border-top: 1px solid rgba(184, 144, 63, 0.4);
+    }
+
+    .brand-en { font-size: 27px; }
+    .brand-divider { height: 18px; }
+    .brand-zh { font-size: 18px; letter-spacing: 2px; }
+
+    /* 第三行：折叠面板（点击汉堡展开），整行宽度 */
+    .nav-links {
+        order: 4;
+        flex-basis: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-height 0.45s ease, opacity 0.35s ease, margin-top 0.35s ease;
+    }
+
+    .nav-links.is-open {
+        max-height: 340px;
+        opacity: 1;
+        pointer-events: auto;
+        margin-top: 4px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(184, 144, 63, 0.4);
+    }
+
+    .nav-links a {
+        padding: 11px 12px;
+        font-size: 15px;
+    }
+
+    .nav-links a::after {
+        display: none;        /* 移动端用整块背景反馈，不使用下划线 */
+    }
+
+    .nav-links a:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+    }
+}
+
+/* ============================================================
+   左侧：座右铭 + 自我介绍
+   ============================================================ */
+.creed-panel {
+    position: absolute;
+    top: 50%;
+    left: 56px;
+    transform: translateY(-50%);
+    max-width: 640px;
+    z-index: 5;
+    animation: creedFadeIn 1.6s ease 0.4s both;
+}
+
+/* 座右铭：放大显示，毛笔体呼应中文标识 */
+.creed {
+    font-family: var(--font-zh-brush);
+    font-size: 58px;
+    line-height: 1.22;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 3px;
+    margin-bottom: 28px;
+    /* 在 14 字断行处从容换行，不让英文/标点错位 */
+    word-break: keep-all;
+    hyphens: auto;
+}
+
+/* 座右铭下方装饰：短横线 */
+.creed::after {
+    content: "";
+    display: block;
+    margin-top: 24px;
+    width: 60px;
+    height: 2px;
+    background-color: var(--glass-border);
+}
+
+/* 自我介绍：思源宋体细字重，与座右铭形成尺寸/字重对比 */
+.intro {
+    font-family: var(--font-zh-serif, var(--font-zh-brush));
+    font-size: 18px;
+    line-height: 1.95;
+    color: #333;
+    letter-spacing: 1.2px;
+    max-width: 520px;
+}
+
+@keyframes creedFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* 响应式：窄屏缩小、下移，避免遮挡导航与右侧 3D 模型 */
+@media (max-width: 767px) {
+    .creed-panel {
+        position: static;
+        transform: none;
+        max-width: 100%;
+        margin: 110px 20px 0;
+        padding: 0;
+    }
+
+    .creed {
+        font-size: 44px;
+        letter-spacing: 3px;
+        margin-bottom: 24px;
+    }
+
+    .creed::after {
+        margin-top: 18px;
+        width: 48px;
+    }
+
+    .intro {
+        font-size: 17px;
+        line-height: 1.8;
+        max-width: 100%;
+    }
+}
+
+/* ============================================================
+   中部核心照片组（左文字 / 中照片矩阵 / 右3D 的三栏中轴）
+   2×2 错落矩阵：左列=科创活动照(训练营/黑客松)，右列=日常交流照(希迪智驾/金种子)
+   ============================================================ */
+.photo-cluster {
+    position: absolute;
+    left: 632px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 448px;
+    height: 442px;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.photo-card {
+    position: absolute;
+    width: 220px;
+    margin: 0;
+    background: #fffdf6;
+    border: 1px solid rgba(184, 144, 63, 0.5);
+    border-radius: 4px;
+    padding: 12px 12px 11px;
+    box-shadow:
+        0 20px 42px rgba(90, 66, 20, 0.24),
+        0 5px 13px rgba(90, 66, 20, 0.11);
+    pointer-events: auto;
+    cursor: pointer;
+    opacity: 0;
+    transition:
+        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.6s ease,
+        border-color 0.4s ease;
+    will-change: transform;
+}
+
+/* 左列①：科创训练营（左上） */
+.photo-1 {
+    --tilt: -5deg;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    transform: var(--lift, translateY(0)) rotate(var(--tilt));
+    animation: photoDrop 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.9s forwards;
+}
+
+/* 右列③：希迪智驾交流（右上，比左列低 12px 形成对角错落） */
+.photo-4 {
+    --tilt: 4deg;
+    left: 228px;
+    top: 12px;
+    z-index: 2;
+    transform: var(--lift, translateY(0)) rotate(var(--tilt));
+    animation: photoDrop 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.05s forwards;
+}
+
+/* 左列②：黑客松赛场（左下） */
+.photo-2 {
+    --tilt: 4deg;
+    left: 0;
+    bottom: 12px;
+    z-index: 3;
+    transform: var(--lift, translateY(0)) rotate(var(--tilt));
+    animation: photoDrop 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+}
+
+/* 右列④：金种子投资（右下） */
+.photo-5 {
+    --tilt: -4deg;
+    left: 228px;
+    bottom: 0;
+    z-index: 3;
+    transform: var(--lift, translateY(0)) rotate(var(--tilt));
+    animation: photoDrop 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.35s forwards;
+}
+
+/* 硬件创作占位卡：真实照片到位前隐藏，不参与矩阵 */
+.photo-3 {
+    display: none;
+}
+
+/* 照片画面区：统一 4:3 规格，保证四张卡片等高、行列严格对齐。
+   背景与拍立得相纸同色，比例更宽的照片(3:2)用 contain 完整显示，
+   上下自然露出同色衬边，零裁切且不突兀 */
+.photo-thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 2px;
+    overflow: hidden;
+    background-color: #fdf8ea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* emoji 占位画面保留暖色渐变（当前未使用，预留第五张卡） */
+.photo-thumb--placeholder {
+    background: linear-gradient(135deg, #f5e6c4 0%, #e8cf94 55%, #d9b86a 100%);
+}
+
+/* 真实图片：完整显示不裁切，宽幅照片上下露出同色衬边 */
+.photo-thumb img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+}
+
+.photo-emoji {
+    font-size: 34px;
+    filter: drop-shadow(0 2px 3px rgba(120, 90, 30, 0.25));
+    user-select: none;
+}
+
+/* 卡片说明：毛笔体，统一字号 */
+.photo-card figcaption {
+    margin-top: 11px;
+    text-align: center;
+    font-family: var(--font-zh-brush);
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #6b4f1d;
+    user-select: none;
+}
+
+/* 悬停：回正上浮、适度放大、层级提升（四张真实照片统一行为） */
+.photo-1:hover,
+.photo-2:hover,
+.photo-4:hover,
+.photo-5:hover {
+    transform: rotate(0deg) scale(1.07) translateY(-8px);
+    z-index: 10;
+    border-color: var(--glass-border);
+    box-shadow:
+        0 28px 52px rgba(90, 66, 20, 0.28),
+        0 7px 16px rgba(90, 66, 20, 0.14);
+    animation-play-state: paused;
+}
+
+/* 矮屏保护：高度不足时压缩行距，取消对角错落 */
+@media (max-height: 760px) and (min-width: 1475px) {
+    .photo-cluster {
+        height: 418px;
+    }
+
+    .photo-4 {
+        top: 0;
+    }
+
+    .photo-2 {
+        bottom: 0;
+    }
+}
+
+/* 中宽桌面：四卡缩小为紧凑 2×2，整体左移 */
+@media (max-width: 1474px) and (min-width: 1380px) {
+    .photo-cluster {
+        left: 600px;
+        width: 344px;
+        height: 360px;
+    }
+
+    .photo-card {
+        width: 168px;
+        padding: 9px 9px 8px;
+    }
+
+    .photo-4,
+    .photo-5 {
+        left: 176px;
+    }
+
+    .photo-card figcaption {
+        margin-top: 8px;
+        font-size: 15px;
+        letter-spacing: 1px;
+    }
+}
+
+/* 偏窄桌面：只保留左列两张科创照竖向排列 */
+@media (max-width: 1379px) and (min-width: 1230px) {
+    .photo-4,
+    .photo-5 {
+        display: none;
+    }
+
+    .photo-cluster {
+        left: 600px;
+        width: 188px;
+        height: 380px;
+    }
+
+    .photo-card {
+        width: 176px;
+    }
+
+    .photo-1 {
+        top: 0;
+    }
+
+    .photo-2 {
+        bottom: 0;
+    }
+}
+
+/* 更窄屏幕/平板：留白带不足，整组隐藏，不做拥挤排版 */
+@media (max-width: 1229px) and (min-width: 768px) {
+    .photo-cluster {
+        display: none;
+    }
+}
+
+/* 手机端：容器恢复全屏定位，仅保留一张小卡浮在模型左上方 */
+@media (max-width: 767px) {
+    /* 手机首屏：高度随内容增长，不裁切 static 排列的座右铭与介绍 */
+    .hero {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    /* 照片/模型/GIF 在手机上恢复相对视口悬浮，保持原有覆盖逻辑 */
+    .photo-cluster {
+        position: fixed;
+        inset: 0;
+        left: auto;
+        top: auto;
+        transform: none;
+        width: auto;
+        height: auto;
+        display: block;
+        z-index: 8;
+    }
+
+    .photo-card {
+        width: 88px;
+        padding: 7px 7px 6px;
+    }
+
+    .photo-card figcaption {
+        font-size: 12px;
+        letter-spacing: 1px;
+        margin-top: 5px;
+    }
+
+    .photo-1 {
+        left: auto;
+        top: auto;
+        right: 44vw;
+        bottom: 34vh;
+    }
+
+    .photo-2,
+    .photo-3,
+    .photo-4,
+    .photo-5 {
+        display: none;
+    }
+}
+
+/* 入场：从下方缩小浮现，终态角度由各卡 --tilt 决定，落定无跳变 */
+@keyframes photoDrop {
+    0% {
+        opacity: 0;
+        transform: rotate(0deg) translateY(26px) scale(0.85);
+    }
+    100% {
+        opacity: 1;
+        transform: var(--lift, translateY(0)) rotate(var(--tilt, 0deg)) scale(1);
+    }
+}
+
+/* ============================================================
+   左下角：日常 GIF 动图（抠图透明底，无容器裸放横排）
+   ============================================================ */
+.gif-strip {
+    position: absolute;
+    left: 48px;
+    bottom: 24px;
+    z-index: 6;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    animation: gifStripIn 1.6s ease 1.6s both;
+}
+
+.gif-item {
+    margin: 0;
+    flex: 0 0 auto;
+    height: 96px;                    /* 统一高度，宽度按 GIF 原始比例自适应 */
+    line-height: 0;                  /* 消除图片底部幽灵间隙 */
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gif-item img {
+    display: block;
+    height: 100%;
+    width: auto;
+    /* 抠图 GIF 直接显示，不加任何边框/底色/圆角裁切 */
+}
+
+/* 悬停：从容上浮，无投影的纯净交互 */
+.gif-item:hover {
+    transform: translateY(-8px) scale(1.1);
+}
+
+@keyframes gifStripIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 移动端：缩小并允许横向滚动，避开右下角 3D 模型 */
+@media (max-width: 767px) {
+    .gif-strip {
+        position: fixed;              /* 手机上恢复视口悬浮 */
+        left: 12px;
+        right: 12px;
+        bottom: 8px;
+        gap: 12px;
+        overflow-x: auto;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .gif-item {
+        height: 58px;
+    }
+
+    /* 手机端悬浮元素滚入第二屏时淡出（桌面端首屏元素随文档流自然离场，无需此规则） */
+    .ip-stage,
+    .photo-cluster,
+    .gif-strip {
+        transition: opacity 0.6s ease, visibility 0.6s;
+    }
+
+    body.past-hero .ip-stage,
+    body.past-hero .photo-cluster,
+    body.past-hero .gif-strip {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+}
+
+/* ============================================================
+   右侧 3D IP 形象展示台
+   ============================================================ */
+.ip-stage {
+    position: absolute;
+    right: 36px;
+    bottom: 28px;
+    width: 400px;
+    height: 500px;
+    z-index: 10;                 /* 低于顶部导航(z:1000)，不遮挡胶囊栏 */
+    animation: stageFadeIn 1.8s ease 0.3s both;
+}
+
+@keyframes stageFadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* model-viewer 本体：透明背景，拖拽手型 */
+#ipViewer {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    --poster-color: transparent;
+    cursor: grab;
+    /* 整体上移，让模型在展示区中偏高一些 */
+    transform: translateY(-24px);
+}
+
+#ipViewer:active {
+    cursor: grabbing;
+}
+
+/* 移除 model-viewer 自带的加载进度条（组件内部 Shadow DOM，需用 ::part 穿透） */
+#ipViewer::part(default-progress-bar),
+#ipViewer::part(default-progress-bar-mask) {
+    display: none;
+}
+
+/* ---------- 趣味加载层（默认隐藏，加载中由 JS 添加 .is-loading 显示） ---------- */
+.stage-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;        /* 垂直居中：对齐模型身体中部 */
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s;
+    /* 与模型上移量同步，让加载层也整体上移，视觉中心对齐模型身体 */
+    transform: translateY(-24px);
+}
+
+.ip-stage.is-loading .stage-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 加载完成后从容淡出 */
+.ip-stage.is-loaded .stage-overlay {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.stage-overlay-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 78%;
+}
+
+/* 快马：上下颠簸 + 轻微左右摆，模拟策马疾驰 */
+.stage-horse {
+    font-size: 34px;
+    animation: horseBounce 0.7s ease-in-out infinite;
+    filter: drop-shadow(0 3px 4px rgba(120, 90, 30, 0.25));
+}
+
+@keyframes horseBounce {
+    0%, 100% { transform: translateY(0) rotate(-4deg); }
+    50%      { transform: translateY(-7px) rotate(4deg); }
+}
+
+/* 文案：马善政毛笔体，呼应品牌中文标识 */
+.stage-loading-text {
+    font-family: var(--font-zh-brush);
+    font-size: 19px;
+    letter-spacing: 2px;
+    color: #6b521f;
+    white-space: nowrap;
+}
+
+/* 进度轨道：褐黄描边的细条 */
+.stage-track {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    border-radius: 999px;
+    background-color: rgba(184, 144, 63, 0.2);
+    overflow: hidden;
+}
+
+/* 进度填充：米金→褐黄渐变，宽度由 JS 按真实进度写入 */
+.stage-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #e8cf8d, var(--glass-border));
+    transition: width 0.3s ease;
+}
+
+.stage-percent {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #8a6d34;
+}
+
+/* ---------- 响应式：窄屏缩小展示区域，贴右下角 ---------- */
+@media (max-width: 767px) {
+    .ip-stage {
+        position: fixed;              /* 手机上恢复视口悬浮 */
+        right: 6px;
+        bottom: 4px;
+        width: min(300px, 58vw);
+        height: min(380px, 52vh);
+    }
+
+    .stage-overlay-inner {
+        width: 90%;
+        gap: 8px;
+    }
+
+    .stage-horse {
+        font-size: 27px;
+    }
+
+    .stage-loading-text {
+        font-size: 15px;
+        letter-spacing: 1px;
+    }
+}
+
+/* ============================================================
+   第一屏 HERO：占满一屏的文档流容器
+   内部座右铭/照片墙/3D/GIF 均相对本容器绝对定位，
+   页面下滚时整屏随文档流自然离场，第二屏紧随其后不重叠
+   ============================================================ */
+.hero {
+    position: relative;
+    height: 100vh;
+    min-height: 640px;
+    overflow: hidden;              /* 绝对定位元素不产生页面滚动条 */
+    z-index: 1;                   /* 高于粒子背景(0)，与第二屏同层级依次排列 */
+}
+
+/* 第一屏外框：仅 上/左/右 三边，底边留给页面交界，不画 */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-top: 4px solid #000;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ============================================================
+   第二屏：关于 · 核心能力结构
+   ============================================================ */
+.about-section {
+    position: relative;
+    z-index: 1;                         /* 高于粒子背景(0)，低于导航(1000) */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 48px 80px;           /* 顶部留出悬浮导航空间 */
+}
+
+/* 整页黑色画框：仅 左/右 两边，顶边与前一屏交界、底边与后一屏交界，均不画。
+   四屏边框逻辑：第一屏画上/左/右，第二、三、四屏仅画左/右，
+   整页左右竖线全程连续，屏与屏之间无横向分隔线。 */
+.about-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    pointer-events: none;               /* 不拦截卡片交互 */
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.3s ease 0.15s;
+}
+
+.about-section.in-view::before {
+    opacity: 1;
+}
+
+/* 内容置于画框之上 */
+.about-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1080px;
+}
+
+/* ---------- 区块标题 ---------- */
+.section-head {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+.section-index {
+    display: inline-block;
+    font-family: var(--font-en-script);
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--glass-border);
+    margin-bottom: 6px;
+}
+
+.section-title {
+    font-family: var(--font-zh-brush);
+    font-size: 48px;
+    font-weight: 400;
+    letter-spacing: 8px;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+/* 标题下金线 */
+.section-title::after {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 2px;
+    margin: 18px auto 0;
+    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+}
+
+.section-sub {
+    margin-top: 16px;
+    font-family: var(--font-zh-brush);
+    font-size: 19px;
+    letter-spacing: 3px;
+    color: #8a6d34;
+}
+
+/* ---------- 能力结构图 ---------- */
+.ability-map {
+    width: 100%;
+}
+
+/* 核心节点：墨黑底 + 褐金描边，全图的"根" */
+.ability-core {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: max-content;
+    margin: 0 auto;
+    padding: 18px 56px;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #2b2b2b, #111);
+    border: 1.5px solid var(--glass-border);
+    box-shadow:
+        0 14px 34px rgba(60, 42, 10, 0.28),
+        inset 0 0 0 1px rgba(232, 207, 141, 0.18);
+}
+
+.ability-core-name {
+    font-family: var(--font-zh-brush);
+    font-size: 28px;
+    letter-spacing: 6px;
+    color: #fdf3da;
+    white-space: nowrap;
+}
+
+.ability-core-sub {
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: #d8b96a;
+}
+
+/* 发散连线 */
+.ability-lines {
+    display: block;
+    width: 100%;
+    height: 96px;
+    overflow: visible;
+}
+
+.ability-line {
+    fill: none;
+    stroke: var(--glass-border);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;   /* 容器缩放时线宽保持恒定 */
+    opacity: 0.55;
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s;
+}
+
+/* 进入视口后逐条绘制 */
+.ability-map.in-view .ability-line {
+    stroke-dashoffset: 0;
+}
+
+.ability-map.in-view .line-2 { transition-delay: 0.45s; }
+.ability-map.in-view .line-3 { transition-delay: 0.55s; }
+.ability-map.in-view .line-4 { transition-delay: 0.65s; }
+
+/* ---------- 四大能力域卡片 ---------- */
+.ability-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+}
+
+.ability-card {
+    position: relative;             /* 顶端接线圆点相对卡片定位 */
+    display: flex;
+    flex-direction: column;
+    padding: 28px 22px 24px;
+    background: rgba(255, 253, 246, 0.92);
+    border: 1px solid rgba(184, 144, 63, 0.45);
+    border-radius: 14px;
+    box-shadow:
+        0 12px 28px rgba(90, 66, 20, 0.10),
+        0 3px 8px rgba(90, 66, 20, 0.06);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.6s ease,
+                border-color 0.4s ease;
+}
+
+.ability-card:hover {
+    transform: translateY(-9px);
+    border-color: var(--glass-border);
+    box-shadow:
+        0 24px 44px rgba(90, 66, 20, 0.20),
+        0 6px 14px rgba(90, 66, 20, 0.10);
+}
+
+/* 卡片顶端的接线小圆点（骑在卡片顶边，与 SVG 线末端汇合） */
+.ability-card::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: var(--glass-border);
+    box-shadow: 0 0 0 4px rgba(184, 144, 63, 0.18);
+    opacity: 0;
+    transition: opacity 0.6s ease 0.9s;
+}
+
+.ability-map.in-view .ability-card::before {
+    opacity: 1;
+}
+
+/* 毛笔序号：壹贰叁肆 */
+.ability-num {
+    font-family: var(--font-zh-brush);
+    font-size: 40px;
+    line-height: 1;
+    color: var(--glass-border);
+    opacity: 0.85;
+    margin-bottom: 14px;
+}
+
+.ability-name {
+    font-family: var(--font-zh-brush);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: var(--ink);
+    margin-bottom: 12px;
+}
+
+.ability-desc {
+    font-size: 14px;
+    line-height: 1.95;
+    color: #5c4c34;
+    margin-bottom: 18px;
+}
+
+/* 能力标签：描边小胶囊 */
+.ability-tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;               /* 标签统一沉底，四卡底边齐整 */
+}
+
+.ability-tags li {
+    padding: 4px 11px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #7a5c22;
+    border: 1px solid rgba(184, 144, 63, 0.5);
+    border-radius: 999px;
+    background: rgba(184, 144, 63, 0.06);
+    white-space: nowrap;
+}
+
+/* ---------- 滚动显现动画（JS 添加 .in-view） ---------- */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s ease var(--delay, 0s),
+                transform 1s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s);
+}
+
+.reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ---------- 响应式 ---------- */
+
+/* 中等桌面：收紧留白与字号 */
+@media (max-width: 1100px) {
+    .about-section {
+        padding: 110px 32px 70px;
+    }
+
+    .section-head {
+        margin-bottom: 44px;
+    }
+
+    .ability-grid {
+        gap: 20px;
+    }
+
+    .ability-card {
+        padding: 24px 18px 20px;
+    }
+
+    .ability-name {
+        font-size: 21px;
+    }
+
+    .ability-desc {
+        font-size: 13px;
+    }
+}
+
+/* 平板：2×2 矩阵，隐藏组织架构线，卡片顶部圆点也一并隐藏 */
+@media (max-width: 900px) {
+    .ability-lines,
+    .ability-card::before {
+        display: none;
+    }
+
+    .ability-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        font-size: 40px;
+        letter-spacing: 6px;
+    }
+}
+
+/* 手机：单列竖排 */
+@media (max-width: 560px) {
+    .about-section {
+        padding: 96px 20px 60px;
+    }
+
+    .section-head {
+        margin-bottom: 34px;
+    }
+
+    .section-title {
+        font-size: 33px;
+        letter-spacing: 4px;
+    }
+
+    .section-sub {
+        font-size: 16px;
+        letter-spacing: 2px;
+    }
+
+    .ability-core {
+        padding: 15px 30px;
+    }
+
+    .ability-core-name {
+        font-size: 23px;
+        letter-spacing: 4px;
+    }
+
+    .ability-core-sub {
+        font-size: 11px;
+        letter-spacing: 3px;
+    }
+
+    .ability-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* ============================================================
+   矮屏桌面（视口高度 ≤900，如 829/768 高的笔记本）：
+   整套能力图纵向收紧，保证标题→核心→连线→四卡完整落在一屏内，
+   底部标签行不再被视口下沿裁切
+   ============================================================ */
+@media (min-width: 901px) and (max-height: 900px) {
+    .about-section {
+        padding: 100px 48px 40px;
+    }
+
+    .section-head {
+        margin-bottom: 40px;
+    }
+
+    .section-index {
+        font-size: 20px;
+        margin-bottom: 2px;
+    }
+
+    .section-title {
+        font-size: 43px;
+        letter-spacing: 6px;
+    }
+
+    .section-title::after {
+        margin-top: 13px;
+    }
+
+    .section-sub {
+        margin-top: 12px;
+        font-size: 17px;
+        letter-spacing: 2px;
+    }
+
+    .ability-core {
+        padding: 14px 50px;
+    }
+
+    .ability-core-name {
+        font-size: 26px;
+        letter-spacing: 5px;
+    }
+
+    .ability-core-sub {
+        font-size: 11px;
+        letter-spacing: 3px;
+    }
+
+    .ability-lines {
+        height: 80px;
+    }
+
+    .ability-card {
+        padding: 22px 21px 18px;
+    }
+
+    .ability-num {
+        font-size: 35px;
+        margin-bottom: 10px;
+    }
+
+    .ability-name {
+        font-size: 22px;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
+
+    .ability-desc {
+        font-size: 13px;
+        line-height: 1.85;
+        margin-bottom: 13px;
+    }
+
+    .ability-tags {
+        gap: 7px;
+    }
+
+    .ability-tags li {
+        padding: 3px 10px;
+        font-size: 11.5px;
+    }
+}
+
+/* 更矮视口（≤720 高）：进一步压缩留白，优先保证内容完整可见 */
+@media (min-width: 901px) and (max-height: 720px) {
+    .about-section {
+        padding: 84px 40px 34px;
+    }
+
+    .section-head {
+        margin-bottom: 28px;
+    }
+
+    .section-title {
+        font-size: 38px;
+    }
+
+    .ability-core {
+        padding: 11px 42px;
+    }
+
+    .ability-core-name {
+        font-size: 23px;
+    }
+
+    .ability-lines {
+        height: 60px;
+    }
+
+    .ability-card {
+        padding: 18px 18px 14px;
+    }
+
+    .ability-num {
+        font-size: 30px;
+        margin-bottom: 7px;
+    }
+
+    .ability-name {
+        font-size: 20px;
+        margin-bottom: 7px;
+    }
+
+    .ability-desc {
+        margin-bottom: 10px;
+    }
+}
+
+/* ============================================================
+   第三屏：实习经历
+   设计语言延续第二屏：黑框(下/左/右)、毛笔体标题、褐黄描边卡片
+   三段经历横向并列，每段含时间/公司/岗位/职责/亮点/标签
+   ============================================================ */
+.experience-section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 24px 40px;          /* 左右收窄以放大内容宽度 */
+}
+
+/* 第三屏画框：仅 左/右 两边，底边留给与第四屏的交界，顶边留给与第二屏的交界 */
+.experience-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.3s ease 0.15s;
+}
+
+.experience-section.in-view::before {
+    opacity: 1;
+}
+
+/* 第三屏标题区压缩（全局 .section-head 为 56px，第三屏 4 卡需更紧凑） */
+.experience-section .section-head {
+    margin-bottom: 24px;
+}
+
+/* ---------- 经历卡片网格（纵向单列，4×1） ---------- */
+.exp-grid {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;                       /* 卡片间距缩小 */
+    width: 100%;
+    max-width: 1320px;               /* 容器大幅加宽 */
+    margin: 0 auto;
+}
+
+.exp-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 240px 1fr;   /* 左栏：身份信息；右栏：职责内容 */
+    align-items: stretch;
+    padding: 18px 28px;              /* 内边距缩小，更紧凑 */
+    background: rgba(255, 253, 246, 0.92);
+    border: 1px solid rgba(184, 144, 63, 0.45);
+    border-radius: 12px;
+    box-shadow:
+        0 8px 20px rgba(90, 66, 20, 0.09),
+        0 2px 6px rgba(90, 66, 20, 0.05);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.6s ease,
+                border-color 0.4s ease;
+}
+
+.exp-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--glass-border);
+    box-shadow:
+        0 18px 34px rgba(90, 66, 20, 0.18),
+        0 5px 12px rgba(90, 66, 20, 0.09);
+}
+
+/* 左右两栏之间的褐黄竖分隔线 */
+.exp-card::after {
+    content: "";
+    position: absolute;
+    top: 16px;
+    bottom: 16px;
+    left: 268px;            /* 左栏 240 + 左 padding 28 */
+    width: 1px;
+    background: rgba(184, 144, 63, 0.25);
+}
+
+/* 左栏：时间 + 公司 + 岗位，垂直堆叠 */
+.exp-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-right: 28px;
+}
+
+.exp-period {
+    font-family: var(--font-zh-brush);
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: var(--glass-border);
+    margin-bottom: 8px;
+}
+
+.exp-company {
+    font-family: var(--font-zh-brush);
+    font-size: 23px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.exp-role {
+    display: inline-block;
+    font-size: 13.5px;
+    letter-spacing: 1px;
+    color: #7a5c22;
+    padding: 2px 10px;
+    border: 1px solid rgba(184, 144, 63, 0.35);
+    border-radius: 999px;
+    background: rgba(184, 144, 63, 0.05);
+}
+
+/* 右栏：职责描述 + 关键成果 + 标签，垂直堆叠 */
+.exp-right {
+    display: flex;
+    flex-direction: column;
+    padding-left: 28px;
+}
+
+.exp-desc {
+    font-size: 13px;
+    line-height: 1.75;
+    color: #5c4c34;
+    margin-bottom: 10px;
+}
+
+.exp-highlight {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: rgba(184, 144, 63, 0.08);
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #4a3a1e;
+    font-weight: 500;
+}
+
+.exp-dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    margin-top: 7px;
+    border-radius: 50%;
+    background: var(--glass-border);
+    box-shadow: 0 0 0 3px rgba(184, 144, 63, 0.2);
+}
+
+/* 标签沉底对齐 */
+.exp-right .ability-tags {
+    margin-top: auto;
+}
+
+.exp-right .ability-tags li {
+    padding: 2px 9px;
+    font-size: 11.5px;
+}
+
+/* ---------- 响应式 ---------- */
+
+/* 中等桌面 */
+@media (max-width: 1100px) {
+    .experience-section {
+        padding: 72px 28px 36px;
+    }
+
+    .exp-grid {
+        gap: 13px;
+        max-width: 1040px;
+    }
+
+    .exp-card {
+        padding: 16px 24px;
+    }
+}
+
+/* 平板：卡片改为上下堆叠（左栏变顶部信息条） */
+@media (max-width: 900px) {
+    .exp-grid {
+        gap: 16px;
+        max-width: 720px;
+    }
+
+    .exp-card {
+        grid-template-columns: 1fr;
+        padding: 20px 24px;
+    }
+
+    /* 隐藏竖分隔线 */
+    .exp-card::after {
+        display: none;
+    }
+
+    .exp-left {
+        padding-right: 0;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(184, 144, 63, 0.25);
+    }
+
+    .exp-right {
+        padding-left: 0;
+    }
+}
+
+/* 手机 */
+@media (max-width: 560px) {
+    .experience-section {
+        padding: 80px 16px 32px;
+    }
+
+    .exp-grid {
+        gap: 12px;
+    }
+
+    .exp-card {
+        padding: 16px 18px;
+    }
+
+    .exp-company {
+        font-size: 20px;
+    }
+
+    .exp-desc {
+        font-size: 12.5px;
+    }
+}
+
+/* 矮屏（≤900 高）：在基础紧凑样式上微调，确保 4 卡落屏 */
+@media (max-height: 900px) {
+    .experience-section {
+        padding: 56px 24px 24px;
+    }
+
+    .experience-section .section-head {
+        margin-bottom: 14px;
+    }
+
+    .experience-section .section-index {
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+
+    .experience-section .section-title {
+        font-size: 30px;
+        letter-spacing: 4px;
+    }
+
+    .experience-section .section-title::after {
+        margin-top: 6px;
+    }
+
+    .experience-section .section-sub {
+        margin-top: 6px;
+        font-size: 13.5px;
+        letter-spacing: 1px;
+    }
+
+    .exp-grid {
+        gap: 10px;
+    }
+
+    .exp-card {
+        padding: 13px 24px;
+    }
+
+    .exp-left {
+        padding-right: 24px;
+    }
+
+    .exp-right {
+        padding-left: 24px;
+    }
+
+    .exp-period {
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .exp-company {
+        font-size: 20px;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+
+    .exp-role {
+        font-size: 12px;
+        padding: 1px 8px;
+    }
+
+    .exp-desc {
+        font-size: 12px;
+        line-height: 1.6;
+        margin-bottom: 7px;
+    }
+
+    .exp-highlight {
+        padding: 6px 10px;
+        margin-bottom: 7px;
+        font-size: 11.5px;
+        line-height: 1.5;
+    }
+
+    .exp-card::after {
+        top: 12px;
+        bottom: 12px;
+        left: 264px;      /* 左栏 240 + 左 padding 24 */
+    }
+}
+
+/* 更矮视口（≤720 高）：进一步压缩 */
+@media (max-height: 720px) {
+    .experience-section {
+        padding: 56px 20px 24px;
+    }
+
+    .experience-section .section-head {
+        margin-bottom: 12px;
+    }
+
+    .experience-section .section-title {
+        font-size: 28px;
+    }
+
+    .experience-section .section-sub {
+        font-size: 13px;
+    }
+
+    .exp-grid {
+        gap: 10px;
+    }
+
+    .exp-card {
+        padding: 13px 20px;
+    }
+
+    .exp-period {
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .exp-company {
+        font-size: 19px;
+        margin-bottom: 5px;
+    }
+
+    .exp-role {
+        font-size: 12px;
+        padding: 1px 8px;
+    }
+
+    .exp-desc {
+        font-size: 12px;
+        line-height: 1.6;
+        margin-bottom: 7px;
+    }
+
+    .exp-highlight {
+        padding: 6px 10px;
+        margin-bottom: 7px;
+        font-size: 11.5px;
+        line-height: 1.5;
+    }
+}
+
+/* ============================================================
+   第四屏：活动运营项目
+   三张项目卡片横向排列，每卡含图片 + 标题 + Leader 标签 + 描述 + 按钮
+   画框：下/左/右（顶边与第三屏交界不画）
+   ============================================================ */
+.projects-section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 48px 60px;
+}
+
+/* 第四屏画框：仅 左/右 两边，顶边与第三屏交界不画，底边留给与第五屏的交界 */
+.projects-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.3s ease 0.15s;
+}
+
+.projects-section.in-view::before {
+    opacity: 1;
+}
+
+/* 第四屏标题区紧凑 */
+.projects-section .section-head {
+    margin-bottom: 40px;
+}
+
+/* ---------- 项目卡片网格（3 列） ---------- */
+.proj-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.proj-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 253, 246, 0.92);
+    border: 1px solid rgba(184, 144, 63, 0.45);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow:
+        0 12px 28px rgba(90, 66, 20, 0.10),
+        0 3px 8px rgba(90, 66, 20, 0.06);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.6s ease,
+                border-color 0.4s ease;
+}
+
+.proj-card:hover {
+    transform: translateY(-9px);
+    border-color: var(--glass-border);
+    box-shadow:
+        0 24px 44px rgba(90, 66, 20, 0.20),
+        0 6px 14px rgba(90, 66, 20, 0.10);
+}
+
+/* 图片容器：统一 4:3 裁切 */
+.proj-img-wrap {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #f5efde;
+}
+
+.proj-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.proj-card:hover .proj-img-wrap img {
+    transform: scale(1.08);
+}
+
+/* 图片上的角标 */
+.proj-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 4px 12px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #fff;
+    background: rgba(184, 144, 63, 0.88);
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+}
+
+/* 卡片正文区 */
+.proj-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 22px 24px 20px;
+}
+
+.proj-name {
+    font-family: var(--font-en-vibes), sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.proj-role-tag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #7a5c22;
+    padding: 2px 12px;
+    border: 1px solid rgba(184, 144, 63, 0.35);
+    border-radius: 999px;
+    background: rgba(184, 144, 63, 0.05);
+    margin-bottom: 12px;
+}
+
+.proj-desc {
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: #5c4c34;
+    margin-bottom: 18px;
+    flex-grow: 1;
+}
+
+/* 查看详细按钮 */
+.proj-detail-btn {
+    align-self: flex-start;
+    padding: 8px 24px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: var(--glass-border);
+    background: transparent;
+    border: 1.5px solid var(--glass-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.proj-detail-btn:hover {
+    color: #fff;
+    background: var(--glass-border);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(184, 144, 63, 0.3);
+}
+
+.proj-detail-btn:active {
+    transform: translateY(0);
+}
+
+/* ---------- 响应式 ---------- */
+
+/* 中等桌面 */
+@media (max-width: 1100px) {
+    .projects-section {
+        padding: 72px 32px 48px;
+    }
+
+    .proj-grid {
+        gap: 22px;
+        max-width: 1000px;
+    }
+
+    .proj-body {
+        padding: 18px 20px 16px;
+    }
+
+    .proj-name {
+        font-size: 21px;
+    }
+}
+
+/* 平板：2 列 */
+@media (max-width: 900px) {
+    .proj-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 680px;
+    }
+}
+
+/* 手机：单列 */
+@media (max-width: 560px) {
+    .projects-section {
+        padding: 80px 20px 48px;
+    }
+
+    .proj-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .proj-name {
+        font-size: 22px;
+    }
+
+    .proj-desc {
+        font-size: 13px;
+    }
+}
+
+/* 矮屏（≤900 高） */
+@media (max-height: 900px) {
+    .projects-section {
+        padding: 64px 48px 40px;
+    }
+
+    .projects-section .section-head {
+        margin-bottom: 28px;
+    }
+
+    .projects-section .section-index {
+        font-size: 16px;
+    }
+
+    .projects-section .section-title {
+        font-size: 34px;
+        letter-spacing: 5px;
+    }
+
+    .projects-section .section-sub {
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .proj-grid {
+        gap: 22px;
+    }
+
+    .proj-body {
+        padding: 18px 22px 16px;
+    }
+
+    .proj-name {
+        font-size: 21px;
+    }
+
+    .proj-desc {
+        font-size: 12.5px;
+        line-height: 1.7;
+        margin-bottom: 14px;
+    }
+
+    .proj-detail-btn {
+        padding: 7px 20px;
+        font-size: 13px;
+    }
+}
+
+/* 更矮视口（≤720 高） */
+@media (max-height: 720px) {
+    .projects-section {
+        padding: 56px 40px 32px;
+    }
+
+    .projects-section .section-head {
+        margin-bottom: 20px;
+    }
+
+    .projects-section .section-title {
+        font-size: 30px;
+    }
+
+    .proj-grid {
+        gap: 16px;
+    }
+
+    .proj-body {
+        padding: 14px 18px 12px;
+    }
+
+    .proj-name {
+        font-size: 19px;
+    }
+
+    .proj-desc {
+        font-size: 12px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    .proj-detail-btn {
+        padding: 6px 18px;
+        font-size: 12.5px;
+    }
+}
+
+/* ============================================================
+   第五屏：科技项目
+   左侧：项目列表（3 项）| 右侧：抖音嵌入式播放器
+   画框：仅 左/右 两边，顶边与第四屏交界不画，底边保留
+   ============================================================ */
+.tech-section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 48px 60px;
+}
+
+/* 第五屏画框：仅 左/右 两边，顶边与第三屏交界不画，底边与第五屏交界不画 */
+.tech-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.3s ease 0.15s;
+}
+
+.tech-section.in-view::before {
+    opacity: 1;
+}
+
+/* 内部容器：标题 + 左右分栏 */
+.tech-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 1400px;
+}
+
+/* 标题区：居中 */
+.tech-inner .tech-header {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* 内容区：3D 模型 + 视频左右分栏 */
+.tech-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+}
+
+/* ---------- 左侧：产品 3D 模型区域 ---------- */
+.tech-model {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 480px;
+}
+
+/* model-viewer 本体：透明背景，拖拽手型 */
+.tech-model model-viewer {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 480px;
+    background-color: transparent;
+    --poster-color: transparent;
+    cursor: grab;
+}
+
+.tech-model model-viewer:active {
+    cursor: grabbing;
+}
+
+/* 移除 model-viewer 自带的加载进度条 */
+.tech-model model-viewer::part(default-progress-bar),
+.tech-model model-viewer::part(default-progress-bar-mask) {
+    display: none;
+}
+
+/* 加载提示层 */
+.tech-model .model-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 253, 246, 0.95);
+    gap: 12px;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+}
+
+.tech-model model-viewer.loaded .model-loading {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.model-loading-text {
+    font-family: var(--font-cn), "Ma Shan Zheng", cursive;
+    font-size: 16px;
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.model-progress {
+    width: 180px;
+    height: 6px;
+    border-radius: 3px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(184, 144, 63, 0.2);
+    overflow: hidden;
+}
+
+.model-progress::-webkit-progress-bar {
+    background: rgba(184, 144, 63, 0.2);
+    border-radius: 3px;
+}
+
+.model-progress::-webkit-progress-value {
+    background: var(--gold);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.model-progress-text {
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 500;
+}
+
+/* ---------- 右侧：本地视频播放器 16:9 铺满 ---------- */
+.tech-video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.video-player {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 70vh;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    background: #000;
+}
+
+.video-player video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ---------- 响应式 ---------- */
+
+/* 平板：垂直堆叠 */
+@media (max-width: 900px) {
+    .tech-content {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .tech-model {
+        min-height: 300px;
+        order: 1;
+    }
+
+    .video-player {
+        max-height: 50vh;
+    }
+}
+
+/* 手机：单列 */
+@media (max-width: 560px) {
+    .tech-section {
+        padding: 80px 20px 48px;
+    }
+
+    .tech-content {
+        gap: 20px;
+    }
+
+    .tech-model {
+        min-height: 240px;
+    }
+
+    .video-player {
+        max-height: 40vh;
+    }
+}
+
+/* 矮屏（≤900 高） */
+@media (max-height: 900px) {
+    .tech-section {
+        padding: 64px 48px 40px;
+    }
+
+    .tech-inner {
+        gap: 24px;
+    }
+
+    .tech-model {
+        min-height: 380px;
+    }
+
+    .video-player {
+        max-height: 55vh;
+    }
+}
+
+/* 更矮视口（≤720 高） */
+@media (max-height: 720px) {
+    .tech-section {
+        padding: 56px 40px 32px;
+    }
+
+    .tech-inner {
+        gap: 18px;
+    }
+
+    .tech-model {
+        min-height: 280px;
+    }
+
+    .video-player {
+        max-height: 45vh;
+    }
+}
+
+/* ============================================================
+   第五屏：认知篇
+   画框：仅 左/右/下 三边，顶边与第四屏交界不画，底边保留
+   ============================================================ */
+.cognition-section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 48px 60px;
+}
+
+/* 第五屏画框：仅 左/右 两边（顶边与第四屏交界不画，底边与第六屏交界不画） */
+.cognition-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.3s ease 0.15s;
+}
+
+.cognition-section.in-view::before {
+    opacity: 1;
+}
+
+/* 内部容器 */
+.cognition-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+    max-width: 1400px;
+    padding: 0 24px;
+}
+
+/* 标题区：居中 */
+.cognition-inner .section-head {
+    text-align: center;
+}
+
+/* 内容区：左右两栏 */
+.cognition-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+/* 卡片：光影玻璃拟态 */
+.cognition-card {
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 253, 246, 0.85) 0%,
+        rgba(255, 251, 240, 0.75) 50%,
+        rgba(255, 253, 246, 0.8) 100%
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 32px 36px;
+    box-shadow: 
+        0 8px 32px rgba(184, 144, 63, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 0 rgba(184, 144, 63, 0.1);
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+}
+
+/* 玻璃光泽顶边 */
+.cognition-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(184, 144, 63, 0.6),
+        rgba(184, 144, 63, 0.3),
+        transparent
+    );
+}
+
+/* 悬停效果 */
+.cognition-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 
+        0 20px 48px rgba(184, 144, 63, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(184, 144, 63, 0.15);
+    border-color: rgba(184, 144, 63, 0.4);
+}
+
+/* 顶部装饰线 */
+.cog-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        var(--gold) 0%,
+        rgba(184, 144, 63, 0.3) 50%,
+        var(--gold) 100%
+    );
+    opacity: 0.7;
+}
+
+/* 标签 */
+.cog-label {
+    display: inline-block;
+    font-family: var(--font-en-vibes), sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    opacity: 0.85;
+}
+
+.cog-title {
+    font-family: var(--font-cn), "Ma Shan Zheng", cursive;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.cog-desc {
+    font-size: 15px;
+    line-height: 1.9;
+    color: #5d5042;
+}
+
+.cog-desc strong {
+    color: var(--gold);
+    font-weight: 600;
+    padding: 0 2px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .cognition-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .cognition-card {
+        padding: 24px 28px;
+    }
+
+    .cog-title {
+        font-size: 22px;
+    }
+
+    .cog-desc {
+        font-size: 13.5px;
+        line-height: 1.8;
+    }
+}
+
+@media (max-height: 900px) {
+    .cognition-section {
+        padding: 56px 40px 36px;
+    }
+
+    .cognition-inner {
+        gap: 24px;
+    }
+
+    .cognition-card {
+        padding: 24px 28px;
+    }
+}
+
+@media (max-height: 720px) {
+    .cognition-section {
+        padding: 48px 32px 28px;
+    }
+
+    .cognition-inner .section-title {
+        font-size: 30px;
+    }
+
+    .cognition-card {
+        padding: 18px 22px;
+    }
+
+    .cog-title {
+        font-size: 18px;
+        margin-bottom: 14px;
+    }
+
+    .cog-desc {
+        font-size: 12.5px;
+        line-height: 1.7;
+    }
+}
+
+/* ============================================================
+   第六屏：社交媒体
+   画框：仅 左/右/下 三边，顶边与第五屏交界不画
+   ============================================================ */
+.social-section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 48px 60px;
+}
+
+/* 第六屏画框：仅 左/右（移除底边，避免与第七屏交界处双线） */
+.social-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.3s ease 0.15s;
+}
+
+.social-section.in-view::before {
+    opacity: 1;
+}
+
+/* 内部容器 */
+.social-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* 标题区：居中 */
+.social-inner .section-head {
+    text-align: center;
+}
+
+/* 内容区：1x4 排列 */
+.social-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    width: 100%;
+}
+
+/* 卡片 */
+.social-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 28px 20px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 253, 246, 0.9) 0%,
+        rgba(255, 251, 240, 0.8) 100%
+    );
+    border: 1px solid rgba(184, 144, 63, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(184, 144, 63, 0.1);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.social-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 32px rgba(184, 144, 63, 0.18);
+    border-color: var(--gold);
+}
+
+/* 二维码占位区 */
+.social-qr {
+    width: 140px;
+    height: 140px;
+    background: linear-gradient(145deg, #f8f4e8, #fff);
+    border: 2px dashed rgba(184, 144, 63, 0.4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.social-qr img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.social-card:hover .social-qr {
+    border-color: var(--gold);
+    background: linear-gradient(145deg, #fff, #fdf8ea);
+}
+
+/* 标签 */
+.social-label {
+    font-family: var(--font-cn), "Ma Shan Zheng", cursive;
+    font-size: 20px;
+    color: var(--ink);
+    letter-spacing: 1px;
+}
+
+.social-desc {
+    font-size: 12px;
+    color: #8a7a5a;
+    letter-spacing: 0.5px;
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+    .social-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .social-qr {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 560px) {
+    .social-section {
+        padding: 60px 24px 40px;
+    }
+
+    .social-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .social-qr {
+        width: 160px;
+        height: 160px;
+    }
+
+    .social-label {
+        font-size: 18px;
+    }
+}
+
+@media (max-height: 900px) {
+    .social-section {
+        padding: 56px 40px 36px;
+    }
+
+    .social-inner {
+        gap: 28px;
+    }
+
+    .social-qr {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (max-height: 720px) {
+    .social-section {
+        padding: 48px 32px 28px;
+    }
+
+    .social-inner .section-title {
+        font-size: 30px;
+    }
+
+    .social-grid {
+        gap: 16px;
+    }
+
+    .social-card {
+        padding: 20px 16px;
+    }
+
+    .social-qr {
+        width: 100px;
+        height: 100px;
+        font-size: 11px;
+    }
+
+    .social-label {
+        font-size: 16px;
+    }
+}
+
+/* ============================================================
+   第七屏：联系
+   画框：仅 上/左/右 三边，底边为页面底边框
+   ============================================================ */
+.contact-section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 48px 60px;
+}
+
+/* 第七屏画框：仅 左/右/下（移除顶边） */
+.contact-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 4px solid #000;
+    border-right: 4px solid #000;
+    border-bottom: 4px solid #000;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.3s ease 0.15s;
+}
+
+.contact-section.in-view::before {
+    opacity: 1;
+}
+
+/* 内部容器 */
+.contact-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+}
+
+/* 核心文案区 */
+.contact-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.contact-lead {
+    font-family: var(--font-cn), "Ma Shan Zheng", cursive;
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    letter-spacing: 2px;
+}
+
+.contact-lead strong {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.contact-sub {
+    font-size: 17px;
+    line-height: 1.9;
+    color: #6b5e4d;
+}
+
+.contact-sub strong {
+    color: #a08050;
+    font-weight: 600;
+}
+
+/* 联系方式 */
+.contact-info {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: var(--ink);
+    padding: 12px 20px;
+    background: rgba(255, 253, 246, 0.8);
+    border: 1px solid rgba(184, 144, 63, 0.3);
+    border-radius: 10px;
+}
+
+.contact-icon {
+    font-family: var(--font-mono), monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contact-text {
+    font-family: var(--font-mono), monospace;
+}
+
+/* 按钮组 */
+.contact-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    background: linear-gradient(135deg, rgba(255, 253, 246, 0.95), rgba(255, 251, 240, 0.9));
+    border: 2px solid rgba(184, 144, 63, 0.5);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: pointer;
+}
+
+.contact-btn:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(184, 144, 63, 0.3);
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.btn-text {
+    font-family: var(--font-mono), monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .contact-lead {
+        font-size: 28px;
+    }
+
+    .contact-sub {
+        font-size: 15px;
+    }
+
+    .contact-info {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .contact-item {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .contact-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .contact-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-height: 900px) {
+    .contact-section {
+        padding: 56px 40px 40px;
+    }
+
+    .contact-inner {
+        gap: 32px;
+    }
+
+    .contact-lead {
+        font-size: 34px;
+    }
+
+    .contact-actions {
+        gap: 16px;
+    }
+
+    .contact-btn {
+        padding: 14px 28px;
+    }
+}
+
+@media (max-height: 720px) {
+    .contact-section {
+        padding: 48px 32px 32px;
+    }
+
+    .contact-inner {
+        gap: 24px;
+    }
+
+    .contact-lead {
+        font-size: 26px;
+    }
+
+    .contact-sub {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .contact-item {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .contact-btn {
+        padding: 12px 24px;
+        font-size: 14px;
+    }
+}
