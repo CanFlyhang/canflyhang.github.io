@@ -9,10 +9,6 @@
     var navLinks = document.querySelector('.nav-links');
     var musicToggle = document.getElementById('musicToggle');
     var bgAudio = document.getElementById('bgAudio');
-    var ipStage = document.querySelector('.ip-stage');
-    var ipViewer = document.getElementById('ipViewer');
-    var stageFill = document.getElementById('stageFill');
-    var stagePercent = document.getElementById('stagePercent');
 
     /**
      * 初始化汉堡菜单（移动端）：点击切换展开态，同步 aria 与按钮图标
@@ -78,83 +74,6 @@
                 hamburger.setAttribute('aria-expanded', 'false');
             }
         });
-    }
-
-    /**
-     * 初始化 3D 模型趣味加载层
-     * 严格绑定 model-viewer 的真实加载事件：
-     * - progress：下载进行中，显示加载层并按 totalProgress(0~1) 更新进度条/百分比
-     * - load：模型就绪，进度补满 100% 后从容淡出
-     * - error：加载失败也隐藏加载层，避免提示永久卡住
-     */
-    function initStageLoading() {
-        if (!ipStage || !ipViewer) return;
-
-        // 模型已缓存且在脚本绑定前就绪：不再显示加载层
-        if (ipViewer.loaded) {
-            updateStageProgress(1);
-            ipStage.classList.add('is-loaded');
-            return;
-        }
-
-        ipViewer.addEventListener('progress', function (e) {
-            var progress = e.detail && typeof e.detail.totalProgress === 'number'
-                ? e.detail.totalProgress : 0;
-
-            // 已加载完成后（load 事件后可能还会有 progress=1 事件）不再重新显示
-            if (ipStage.classList.contains('is-loaded')) return;
-
-            ipStage.classList.add('is-loading');
-            updateStageProgress(progress);
-        });
-
-        ipViewer.addEventListener('load', function () {
-            updateStageProgress(1);
-            ipStage.classList.remove('is-loading');
-            ipStage.classList.add('is-loaded');
-        });
-
-        ipViewer.addEventListener('error', function () {
-            ipStage.classList.remove('is-loading');
-            ipStage.classList.add('is-loaded');
-        });
-    }
-
-    /* ====== 第五屏：科技项目 3D 模型加载监听 ====== */
-    var techModel = document.querySelector('.tech-model model-viewer');
-    if (techModel) {
-        var techProgress = techModel.querySelector('.model-progress');
-        var techProgressText = techModel.querySelector('.model-progress-text');
-
-        techModel.addEventListener('progress', function (e) {
-            var progress = e.detail && typeof e.detail.totalProgress === 'number'
-                ? e.detail.totalProgress : 0;
-            if (techProgress) {
-                techProgress.value = Math.round(progress * 100);
-            }
-            if (techProgressText) {
-                techProgressText.textContent = Math.round(progress * 100) + '%';
-            }
-        });
-
-        techModel.addEventListener('load', function () {
-            techModel.classList.add('loaded');
-        });
-
-        techModel.addEventListener('error', function () {
-            techModel.classList.add('loaded');
-        });
-    }
-
-    /**
-     * 更新加载层进度条宽度与百分比文本
-     * @param {number} progress - 0~1 的加载进度
-     */
-    function updateStageProgress(progress) {
-        if (!stageFill || !stagePercent) return;
-        var percent = Math.round(Math.min(Math.max(progress, 0), 1) * 100);
-        stageFill.style.width = percent + '%';
-        stagePercent.textContent = percent + '%';
     }
 
     /**
@@ -231,7 +150,6 @@
         initHamburger();
         initMusicToggle();
         initResizeReset();
-        initStageLoading();
         initScrollReveal();
         initHeroDismiss();
     });

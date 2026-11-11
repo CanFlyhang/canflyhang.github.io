@@ -9,8 +9,6 @@
     <!-- Great Vibes：英文连笔花体；Ma Shan Zheng：马善政毛笔体，形成"双手写"呼应 -->
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Google model-viewer：网页 3D 模型展示组件 -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
 </head>
 <body>
 
@@ -134,33 +132,15 @@
         </figure>
     </div>
 
-    <!-- ============ 右侧 3D IP 形象（仅可水平旋转） ============ -->
+    <!-- ============ 右侧 3D IP 形象 ============ -->
     <aside class="ip-stage" aria-label="CanFlyhang 3D 形象">
-        <model-viewer
-            id="ipViewer"
-            src="CanFlyhang.glb"
+        <video
+            id="ipVideo"
+            class="ip-video"
+            src="Video/canflyhang-3d.webm"
+            poster="gif/canflyhang-3d.gif"
             alt="CanFlyhang 3D 形象"
-            camera-controls
-            disable-pan
-            disable-zoom
-            min-polar-angle="75deg"
-            max-polar-angle="75deg"
-            interaction-prompt="none"
-            touch-action="pan-y"
-            shadow-intensity="0.6"
-            shadow-softness="1"></model-viewer>
-
-        <!-- 趣味加载层：由 script.js 依据模型真实加载进度控制显隐 -->
-        <div class="stage-overlay" id="stageOverlay">
-            <div class="stage-overlay-inner">
-                <span class="stage-horse" aria-hidden="true">🐎</span>
-                <p class="stage-loading-text">鸡腿航正在快马加鞭赶过来</p>
-                <div class="stage-track">
-                    <span class="stage-fill" id="stageFill"></span>
-                </div>
-                <span class="stage-percent" id="stagePercent">0%</span>
-            </div>
-        </div>
+            autoplay loop muted playsinline></video>
     </aside>
 
     <!-- ============ 左下角：日常 GIF 动图条 ============ -->
@@ -432,25 +412,12 @@
             <div class="tech-content">
                 <!-- 左侧：产品 3D 模型 -->
                 <div class="tech-model">
-                <model-viewer
-                    src="Workingmate.glb"
-                    alt="Workingmate 3D 模型"
-                    auto-rotate
-                    camera-controls
-                    disable-zoom
-                    shadow-intensity="1"
-                    environment-image="neutral"
-                    exposure="1"
-                    poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23fdf8ea' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23b8903f' font-family='sans-serif' font-size='12'%3E%E5%8A%A0%E8%BD%BD%E4%B8%AD...%3C/text%3E%3C/svg%3E"
-                    loading="eager">
-                    <!-- 加载提示 -->
-                    <div class="model-loading" slot="progress-bar">
-                        <span class="model-loading-text">🐎 鸡腿航正在快马加鞭赶来</span>
-                        <progress class="model-progress" value="0" max="100"></progress>
-                        <span class="model-progress-text">0%</span>
-                    </div>
-                </model-viewer>
-            </div>
+                    <video
+                        src="Video/workingmate-3d.webm"
+                        poster="gif/workingmate-3d.gif"
+                        alt="Workingmate 3D 模型"
+                        autoplay loop muted playsinline></video>
+                </div>
 
             <!-- 右侧：本地视频播放器 -->
             <div class="tech-video reveal" style="--delay:0.20s">
